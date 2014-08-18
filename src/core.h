@@ -6,16 +6,29 @@ namespace pbpdp
 {
 	const char params[373];
 	
-	class scheme_parameters
+	class serializable
+	{
+	public:
+		void serialize(unsigned char *data,unsigned int size) const = 0;
+		void deserialize(unsigned char *data,unsigned int size) = 0;
+		unsigned int get_serialized_size() const = 0;
+	};
+	
+	class scheme_parameters : public serializable
 	{
 	public:
 		void init(const char *param);
+		void init(unsigned char *data,unsigned int sz); // initializes from serialized form
 		void cleanup();
 	
 		pairing_t get_pairing() const { return _pairing; }
 		element_t get_g() const { return _g; }
 		unsigned int get_name_len() const { return _name_length; }
 		unsigned int get_sig_len() const { return _sig_length; }
+		
+		void serialize(unsigned char *data,unsigned int size) const;
+		void deserialize(unsigned char *data,unsigned int size);
+		unsigned int get_serialized_size() const;
 		
 	private:
 		bool				_initialized;
@@ -25,7 +38,7 @@ namespace pbpdp
 		unsigned int		_sig_length;
 	};
 	
-	class secret_parameters
+	class secret_parameters : public serializable
 	{
 	public:
 		void init(const scheme_parameters &scheme);
@@ -33,6 +46,10 @@ namespace pbpdp
 		
 		element_t get_ssk() const { return _ssk; }
 		element_t get_x() const { return _x; }
+		
+		void serialize(unsigned char *data,unsigned int size) const;
+		void deserialize(unsigned char *data,unsigned int size);
+		unsigned int get_serialized_size() const;
 		
 	private:
 		bool				_initialized;
@@ -51,6 +68,10 @@ namespace pbpdp
 		element_t get_v() const { return _v; }
 		element_t get_pair() const { return _euv; }
 		
+		void serialize(unsigned char *data,unsigned int size) const;
+		void deserialize(unsigned char *data,unsigned int size);
+		unsigned int get_serialized_size() const;
+		
 	private:
 		bool 				_initialized;
 		element_t			_spk;			// G2
@@ -59,7 +80,7 @@ namespace pbpdp
 		element_t			_euv;			// GT
 	};
 
-	class verification_metadata
+	class verification_metadata : public serializable
 	{
 	public:
 		void init(const secret_parameters &s, const public_parameters &p, const scheme_parameters &scheme, file &f);
@@ -76,6 +97,10 @@ namespace pbpdp
 		void get_Wi(unsigned char *W, unsigned int sz, unsigned int i) const;
 		void get_HWi(element_t e,unsigned int i) const;
 		
+		void serialize(unsigned char *data,unsigned int size) const;
+		void deserialize(unsigned char *data,unsigned int size);
+		unsigned int get_serialized_size() const;
+		
 	private:
 		bool				_initialized;
 		element_t* 			_authenticators;
@@ -86,7 +111,7 @@ namespace pbpdp
 		unsigned int		_name_sig_len;
 	};
 	
-	class challenge
+	class challenge : public serializable
 	{
 	public:
 		typedef struct 
@@ -101,13 +126,17 @@ namespace pbpdp
 		unsigned int get_count() const { return _count; }
 		pair get_pair(unsigned int i) const { return _pairs[i]; }
 		
+		void serialize(unsigned char *data,unsigned int size) const;
+		void deserialize(unsigned char *data,unsigned int size);
+		unsigned int get_serialized_size() const;
+		
 	private:
 		bool				_initialized;
 		challenge_pair *	_pairs;
 		unsigned int 		_count;
 	};
 
-	class response_proof
+	class response_proof : public serializable
 	{
 	public:
 		void init(const challenge &c, const verification_metadata &vm, const public_parameters &p,const scheme_parameters &scheme, file &f);
@@ -116,6 +145,10 @@ namespace pbpdp
 		element_t get_mu() const { return _mu; }
 		element_t get_sigma() const { return _sigma; }
 		element_t get_R() const { return _R; }
+		
+		void serialize(unsigned char *data,unsigned int size) const;
+		void deserialize(unsigned char *data,unsigned int size);
+		unsigned int get_serialized_size() const;
 		
 	private:
 		bool				_initialized;
@@ -136,7 +169,7 @@ namespace pbpdp
 	bool check_sig(const verification_metadata &vmd, const public_parameters &p, const scheme_parameters &scheme);
 	void gen_challenge(challenge &chal,const public_parameters &p, const scheme_parameters &scheme, unsigned int c, unsigned int chunk_count);
 	void gen_proof(response_proof &rp, const challenge &c, const verification_metadata &vm, const public_parameters &p, const scheme_parameters &scheme);
-	bool verify_proof(const response_proof &r, const challenge &c, const public_parameters &p);
+	bool verify_proof(const response_proof &r, const challenge &c, const public_parameters &p, const scheme_parameters &scheme);
 	
 	void hash_data_to_element(element_t e,unsigned char *data,unsigned int len);
 	void hash_element_to_element(element_t out, element_t in);
