@@ -1,0 +1,185 @@
+params.o: params.cxx core.h c:\mingw\include\pbc\pbc.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\stdarg.h c:\mingw\include\stdio.h \
+ c:\mingw\include\_mingw.h c:\mingw\include\sdkddkver.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\stddef.h \
+ c:\mingw\include\sys\types.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\stdint.h \
+ c:\mingw\include\stdint.h c:\mingw\include\stdlib.h \
+ c:\mingw\include\gmp.h c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\iosfwd \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\c++config.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\os_defines.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\cpu_defines.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stringfwd.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\memoryfwd.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\postypes.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cwchar \
+ c:\mingw\include\wchar.h c:\mingw\include\wctype.h \
+ c:\mingw\include\string.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cstdio \
+ c:\mingw\include\pbc\pbc_utils.h c:\mingw\include\pbc\pbc_field.h \
+ c:\mingw\include\pbc\pbc_param.h c:\mingw\include\pbc\pbc_pairing.h \
+ c:\mingw\include\pbc\pbc_curve.h c:\mingw\include\pbc\pbc_mnt.h \
+ c:\mingw\include\pbc\pbc_a1_param.h c:\mingw\include\pbc\pbc_a_param.h \
+ c:\mingw\include\pbc\pbc_d_param.h c:\mingw\include\pbc\pbc_e_param.h \
+ c:\mingw\include\pbc\pbc_f_param.h c:\mingw\include\pbc\pbc_g_param.h \
+ c:\mingw\include\pbc\pbc_i_param.h c:\mingw\include\pbc\pbc_random.h \
+ c:\mingw\include\pbc\pbc_memory.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\vector \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_algobase.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\functexcept.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\exception_defines.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\cpp_type_traits.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ext\type_traits.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ext\numeric_traits.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_pair.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\move.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\concept_check.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_iterator_base_types.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_iterator_base_funcs.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\debug\debug.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_iterator.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\allocator.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\c++allocator.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ext\new_allocator.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\new \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\exception \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\atomic_lockfree_defines.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_construct.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ext\alloc_traits.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_uninitialized.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_vector.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_bvector.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\range_access.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\vector.tcc
+
+core.h:
+
+c:\mingw\include\pbc\pbc.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\stdarg.h:
+
+c:\mingw\include\stdio.h:
+
+c:\mingw\include\_mingw.h:
+
+c:\mingw\include\sdkddkver.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\stddef.h:
+
+c:\mingw\include\sys\types.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\stdint.h:
+
+c:\mingw\include\stdint.h:
+
+c:\mingw\include\stdlib.h:
+
+c:\mingw\include\gmp.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\iosfwd:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\c++config.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\os_defines.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\cpu_defines.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stringfwd.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\memoryfwd.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\postypes.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cwchar:
+
+c:\mingw\include\wchar.h:
+
+c:\mingw\include\wctype.h:
+
+c:\mingw\include\string.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cstdio:
+
+c:\mingw\include\pbc\pbc_utils.h:
+
+c:\mingw\include\pbc\pbc_field.h:
+
+c:\mingw\include\pbc\pbc_param.h:
+
+c:\mingw\include\pbc\pbc_pairing.h:
+
+c:\mingw\include\pbc\pbc_curve.h:
+
+c:\mingw\include\pbc\pbc_mnt.h:
+
+c:\mingw\include\pbc\pbc_a1_param.h:
+
+c:\mingw\include\pbc\pbc_a_param.h:
+
+c:\mingw\include\pbc\pbc_d_param.h:
+
+c:\mingw\include\pbc\pbc_e_param.h:
+
+c:\mingw\include\pbc\pbc_f_param.h:
+
+c:\mingw\include\pbc\pbc_g_param.h:
+
+c:\mingw\include\pbc\pbc_i_param.h:
+
+c:\mingw\include\pbc\pbc_random.h:
+
+c:\mingw\include\pbc\pbc_memory.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\vector:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_algobase.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\functexcept.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\exception_defines.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\cpp_type_traits.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ext\type_traits.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ext\numeric_traits.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_pair.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\move.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\concept_check.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_iterator_base_types.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_iterator_base_funcs.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\debug\debug.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_iterator.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\allocator.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\c++allocator.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ext\new_allocator.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\new:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\exception:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\atomic_lockfree_defines.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_construct.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ext\alloc_traits.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_uninitialized.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_vector.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_bvector.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\range_access.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\vector.tcc:
