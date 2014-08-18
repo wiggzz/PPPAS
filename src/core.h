@@ -11,6 +11,7 @@ namespace pbpdp
 		virtual unsigned int get_chunk_count() = 0; // gets the total number of chunks in the file
 	};
 	
+	
 	class serializable
 	{
 	public:
@@ -48,6 +49,26 @@ namespace pbpdp
 		unsigned int 		_name_length;
 		unsigned int		_sig_length;
 		pbc_param_t			_params;
+	};
+	
+	class element_hash
+	{
+	public:
+		element_hash() : _initialized(false) {}
+		void init(scheme_parameters &scheme);
+		void cleanup();
+	
+		void hash_data_to_element(element_t e,unsigned char *data,unsigned int len) const;
+		void hash_element_to_element(element_t out, element_t in) const;
+		void hash_data_to_mpz(mpz_t e,unsigned char *data,unsigned int len) const;
+		void hash_mpz_to_mpz(mpz_t out,mpz_t in) const;
+		
+	private:
+		bool						_initialized;
+		mutable CryptoPP::SHA256 	_sha256;
+		mutable unsigned char*		_hash_buf;
+		unsigned int 				_hash_sz;
+		mutable unsigned char*		_element_buf;
 	};
 	
 	class secret_parameters //: public serializable
@@ -109,9 +130,11 @@ namespace pbpdp
 		element_s* get_authenticator(unsigned int i) { return &_authenticators[i]; }
 		
 		unsigned int get_W_size() const;
-		void get_Wi(unsigned char *W, unsigned int i) const;
+		void append_index_to_W(unsigned int i);
 		void get_HWi(element_t e,unsigned int i) const;
+		void get_HWi(mpz_t e,unsigned int i) const;
 		void get_Hname(element_t e) const;  // returns the hash of the name (for signing)
+		void get_Hname(mpz_t e) const;
 		
 		//void serialize(unsigned char *data,unsigned int size) const;
 		//void deserialize(unsigned char *data,unsigned int size);
@@ -125,6 +148,8 @@ namespace pbpdp
 		unsigned int		_name_len;
 		unsigned char *		_name_sig;
 		unsigned int		_name_sig_len;
+		unsigned char* 		_W_buffer;
+		element_hash		_hasher;
 	};
 	
 	class challenge //: public serializable
@@ -181,7 +206,4 @@ namespace pbpdp
 	void gen_challenge(challenge &chal, scheme_parameters &scheme, unsigned int c, unsigned int chunk_count);
 	void gen_proof(response_proof &rp, challenge &c, verification_metadata &vm, public_parameters &p, scheme_parameters &scheme, file &f);
 	bool verify_proof(response_proof &r, challenge &c, verification_metadata &vm, public_parameters &p, scheme_parameters &scheme);
-	
-	void hash_data_to_element(element_t e,unsigned char *data,unsigned int len);
-	void hash_element_to_element(element_t out, element_t in);
 };

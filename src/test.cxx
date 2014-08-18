@@ -87,7 +87,7 @@ int main()
 	scheme_parameters scheme;
 	public_parameters p;
 	secret_parameters s;
-	const unsigned int size = 32000;
+	const unsigned int size = 64000;
 	
 	std::cout << "Generating key..." << std::endl;
 	

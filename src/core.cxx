@@ -43,6 +43,7 @@ void scheme_parameters::init()
 	}
 	else
 	{
+		std::cout << "Generating A parameters." << std::endl;
 		_L_available = false;
 		pbc_param_init_a_gen(_params,160,512);
 	}
@@ -113,6 +114,9 @@ void public_parameters::cleanup()
 void verification_metadata::init(secret_parameters &s, public_parameters &p, scheme_parameters &scheme, file &f)
 {
 	std::cout << "Initializing verification_metadata..." << std::endl;
+	
+	_hasher.init(scheme);
+	
 	unsigned int count = f.get_chunk_count();
 	allocate_authenticators(count,scheme);
 	element_t t0;
@@ -150,6 +154,8 @@ void verification_metadata::init(secret_parameters &s, public_parameters &p, sch
 	
 	_name_len = scheme.get_name_len();
 	_name = new unsigned char[_name_len];
+	_W_buffer = new unsigned char[get_W_size()];
+	memcpy(_W_buffer,_name,_name_len);
 	element_to_bytes(_name,name);
 	
 	element_clear(name);
@@ -211,6 +217,7 @@ void verification_metadata::cleanup()
 {
 	delete[] _name;
 	delete[] _name_sig;
+	delete[] _W_buffer;
 	_initialized = false;
 }
 
@@ -301,35 +308,33 @@ unsigned int verification_metadata::get_W_size() const
 	return _name_len + sizeof(unsigned int);
 }
 
-void verification_metadata::get_Wi(unsigned char *W, unsigned int i) const
+void verification_metadata::append_index_to_W(unsigned int i)
 {
-	memcpy(W,_name,_name_len);
-	memcpy(W+_name_len,(unsigned char*)&i,sizeof(unsigned int));
+	*(unsigned int*)(_W_buffer+_name_len) = i;
 }
 
 void verification_metadata::get_HWi(element_t e,unsigned int i) const
+{	
+	append_index_to_W(i);
+	
+	_hasher.hash_data_to_element(e,_W_buffer,get_W_size());
+}
+
+void verification_metadata::get_HWi(mpz_t e,unsigned int i) const
 {
-	static unsigned char *W = 0;
-	static unsigned int W_cap = 0;
+	append_index_to_W(i);
 	
-	if (W_cap < get_W_size())
-	{
-		if (W)
-		{
-			delete[] W;
-		}
-		W_cap = get_W_size();
-		W = new unsigned char[get_W_size()];
-	}
-	
-	get_Wi(W,i);
-	
-	hash_data_to_element(e,W,get_W_size());
+	_hasher.hash_data_to_mpz(e,_W_buffer,get_W_size());
 }
 
 void verification_metadata::get_Hname(element_t e) const
 {
-	hash_data_to_element(e,_name,_name_len);
+	_hasher.hash_data_to_element(e,_name,_name_len);
+}
+
+void verification_metadata::get_Hname(mpz_t e) const
+{
+	_hasher.hash_data_to_mpz(e, name, _name_len);
 }
 
 void challenge::init(scheme_parameters &scheme, unsigned int c, unsigned int chunk_count)
@@ -393,6 +398,9 @@ void response_proof::init(challenge &c, verification_metadata &vm, public_parame
 	element_t gamma;
 	element_t t0;
 	mpz_t t1;
+	element_hash hasher;
+	
+	hasher.init(scheme);
 	
 	element_init_Zr(r,scheme.get_pairing());
 	
@@ -433,7 +441,7 @@ void response_proof::init(challenge &c, verification_metadata &vm, public_parame
 	
 	element_init_Zr(_mu,scheme.get_pairing());
 	
-	hash_element_to_element(gamma,_R);
+	hasher.hash_element_to_element(gamma,_R);
 	
 	// mu = r + gamma * mu'
 	element_mul(_mu,gamma,mu_prime);
@@ -501,9 +509,13 @@ bool verify_proof(response_proof &r, challenge &c, verification_metadata &vm, pu
 	element_t t0;
 	element_t t1;
 	
+	element_hash hasher;
+	
+	hasher.init(scheme);
+	
 	element_init_Zr(gamma,scheme.get_pairing());
 	
-	hash_element_to_element(gamma,r.get_R());
+	hasher.hash_element_to_element(gamma,r.get_R());
 	
 	element_init_G1(t0,scheme.get_pairing());
 	element_init_GT(lhs,scheme.get_pairing());
@@ -555,45 +567,51 @@ bool verify_proof(response_proof &r, challenge &c, verification_metadata &vm, pu
 	return result;
 }
 
-void hash_data_to_element(element_t e,unsigned char *data,unsigned int len)
+void element_hash::init(scheme_parameters &scheme)
 {
-	static CryptoPP::SHA256 sha256;
-	static unsigned char *hash = 0;
-	static unsigned int hash_cap = 0;
-
-	if (hash_cap < sha256.DigestSize())
-	{
-		if (hash)
-		{
-			delete[] hash;
-		}
-		hash_cap = sha256.DigestSize();
-		hash = new unsigned char[sha256.DigestSize()];
-	}
-	
-	sha256.CalculateDigest(hash,data,len);
-	
-	element_from_hash(e,hash,sha256.DigestSize());
+	_hash_sz = _sha256.DigestSize();
+	_hash_buf = new unsigned char[_hash_sz];
+	_element_buf = new unsigned char[2*pairing_length_in_bytes_G1(scheme.get_pairing())];
+	_initialized = true;
 }
 
-void hash_element_to_element(element_t out, element_t in)
+void element_hash::cleanup()
 {
-	static unsigned char *buffer = 0;
-	static unsigned int cap = 0;
-	unsigned int req_len = element_length_in_bytes(in);
-	if (req_len > cap)
+	if (_initialized)
 	{
-		if (buffer)
-		{
-			delete[] buffer;
-		}
-		cap = req_len;
-		buffer = new unsigned char[cap];
+		delete[] _hash_buf;
+		delete[] _element_buf;
 	}
+}
+
+void element_hash::hash_data_to_element(element_t e,unsigned char *data,unsigned int len) const
+{
+	_sha256.CalculateDigest(_hash_buf,data,len);
 	
-	element_to_bytes(buffer,in);
+	element_from_hash(e,_hash_buf,_hash_sz);
+}
+
+void element_hash::hash_element_to_element(element_t out, element_t in) const
+{
+	unsigned int n = element_to_bytes(_element_buf,in);
 	
-	hash_data_to_element(out,buffer,req_len);
+	hash_data_to_element(out,_element_buf,n);
+}
+
+void element_hash::hash_data_to_mpz(mpz_t e,unsigned char *data,unsigned int len) const
+{
+	_sha256.CalculateDigest(_hash_buf,data,len);
+	
+	mpz_import(e,len,1,sizeof(unsigned char),0,0,data);
+}
+
+void element_hash::hash_mpz_to_mpz(mpz_t out,mpz_t in) const
+{
+	size_t count;
+	
+	mpz_export(_element_buf,&count,1,sizeof(unsigned char),0,0,in);
+	
+	hash_data_to_mpz(out,_element_buf,count);
 }
 
 };
