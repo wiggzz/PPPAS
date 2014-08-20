@@ -1,7 +1,9 @@
 #include <pbc/pbc.h>
 #include <vector>
 
-// this is an implementation of C. Wang, S. Chow, Q. Wang, K. Ren, W. Lou "Privacy-Preserving Public Auditing for Secure Cloud Storage"
+// this is an implementation of 
+//
+// C. Wang, S. Chow, Q. Wang, K. Ren, W. Lou "Privacy-Preserving Public Auditing for Secure Cloud Storage"
 
 namespace pbpdp
 {	

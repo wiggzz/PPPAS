@@ -1,0 +1,6 @@
+To install run:
+
+./configure
+make
+
+not sure that install is supported at this point since there isn't really a library to install.
