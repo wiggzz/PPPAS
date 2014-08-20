@@ -7,51 +7,45 @@
 namespace pbpdp
 {
 
-void scheme_parameters::init()
+void scheme_parameters::init(char *params)
 {	
-	bool use_a1_params = false;
-	
-	if (use_a1_params)
+	if (params)
 	{
-		std::cout << "Generating A1 parameters." << std::endl;
-		// first generate two large 512 bit primes
-		mpz_t r0,r1;
-		mpz_t p,q,n;
-		
-		mpz_init(r0);
-		mpz_init(r1);
-		mpz_init(p);
-		mpz_init(q);
-		mpz_init(n);
-		mpz_init(_L);
-		
-		pbc_mpz_randomb(r0,513);
-		pbc_mpz_randomb(r1,512);
-		
-		mpz_nextprime(p,r0);
-		mpz_nextprime(q,r1);
-		
-		mpz_mul(n,p,q);
-		
-		// _L = _N - (p + q - 1);
-		mpz_add(_L,p,q);
-		mpz_sub_ui(_L,_L,1);
-		mpz_sub(_L,n,_L);
-		_L_available = true;
-		
-		pbc_param_init_a1_gen(_params,n);
+		pbc_param_init_set_str(_params,params);
 	}
 	else
 	{
-		std::cout << "Generating A parameters." << std::endl;
-		_L_available = false;
-		pbc_param_init_a_gen(_params,160,512);
+		if (1)
+		{
+			std::cout << "Generating A parameters." << std::endl;
+			_L_available = false;
+			pbc_param_init_a_gen(_params,160,512);
+			
+			std::cout << "Finished generating parameters." << std::endl;
+		}
+		else
+		{
+			std::cout << "Generating A1 parameters." << std::endl;
+			mpz_t p,q,N;
+			mpz_init(p);
+			mpz_init(q);
+			mpz_init(N);
+			mpz_init(_L);
+			pbc_mpz_randomb(p,513);
+			pbc_mpz_randomb(q,512);
+			mpz_nextprime(p,p);
+			mpz_nextprime(q,q);
+			mpz_mul(N,p,q);
+			mpz_sub(_L,N,p);
+			mpz_sub(_L,_L,q);
+			mpz_add_ui(_L,_L,1);
+			
+			pbc_param_init_a1_gen(_params,N);
+			std::cout << "Finished generating parameters." << std::endl;
+		}
 	}
 	
-	std::cout << "Finished generating parameters." << std::endl;
-	
 	pairing_init_pbc_param(_pairing,_params);
-	
 	element_init_G2(_g,_pairing);
 	element_random(_g);
 	_name_length = pairing_length_in_bytes_Zr(_pairing);
@@ -122,31 +116,17 @@ void verification_metadata::init(secret_parameters &s, public_parameters &p, sch
 	element_t t0;
 	element_t t1;
 	element_t z0;
+	//mpz_t z0;
 	mpz_t z1;
-	mpz_t xmodl_mpz;
-	element_t xmodl;
 	
 	element_init_G1(t0,scheme.get_pairing());
 	element_init_G1(t1,scheme.get_pairing());
 	element_init_Zr(z0,scheme.get_pairing());
+	//mpz_init(z0);
 	mpz_init(z1);
-	mpz_init(xmodl_mpz);
-	element_init_Zr(xmodl,scheme.get_pairing());
 	
 	bool eulers_theorem_opt = false;
 	
-	element_set(xmodl,s.get_x());
-	
-	if (scheme.get_L_available())
-	{
-		std::cout << "Using euler's theorem to improve performance." << std::endl;
-		eulers_theorem_opt = true;
-		element_to_mpz(xmodl_mpz,xmodl);
-		mpz_mod(xmodl_mpz,xmodl_mpz,scheme.get_L());
-		element_set_mpz(xmodl,xmodl_mpz);
-	}
-	
-	mpz_clear(xmodl_mpz);	
 	
 	element_t name;
 	element_init_Zr(name,scheme.get_pairing());
@@ -169,24 +149,17 @@ void verification_metadata::init(secret_parameters &s, public_parameters &p, sch
 	{
 		get_HWi(t0,i);
 		
-		if (eulers_theorem_opt)
-		{
-			f.get_chunk(z1,i);
-			mpz_mod(z1,z1,scheme.get_L());
-			element_set_mpz(z0,z1);
-		}
-		else
-		{
-			f.get_chunk(z0,i);
-		}
+		f.get_chunk(z1,i);
+		//element_set_mpz(z0,z1);
 		
-		element_pp_pow_zn(t1,z0,pp);
+		//element_pp_pow_zn(t1,z0,pp);
+		element_pow_mpz(t1,p.get_u(),z1);
 		
 		element_mul(t0,t0,t1);
-		element_pow_zn(&_authenticators[i],t0,xmodl);
+		element_pow_zn(&_authenticators[i],t0,s.get_x());
 	}
 	std::cout << "Authenticators calculated." << std::endl;
-	element_pp_clear(pp);
+	//element_pp_clear(pp);
 	
 	// generate name signature
 	element_t name_sig;
@@ -204,10 +177,10 @@ void verification_metadata::init(secret_parameters &s, public_parameters &p, sch
 	element_clear(name_sig);
 	
 	element_clear(z0);
+	//mpz_clear(z0);
 	mpz_clear(z1);
 	element_clear(t1);
 	element_clear(t0);
-	element_clear(xmodl);
 	
 	_initialized = true;
 	std::cout << "Verification metatdata initialized..." << std::endl;
@@ -308,7 +281,7 @@ unsigned int verification_metadata::get_W_size() const
 	return _name_len + sizeof(unsigned int);
 }
 
-void verification_metadata::append_index_to_W(unsigned int i)
+void verification_metadata::append_index_to_W(unsigned int i) const
 {
 	*(unsigned int*)(_W_buffer+_name_len) = i;
 }
@@ -334,7 +307,7 @@ void verification_metadata::get_Hname(element_t e) const
 
 void verification_metadata::get_Hname(mpz_t e) const
 {
-	_hasher.hash_data_to_mpz(e, name, _name_len);
+	_hasher.hash_data_to_mpz(e, _name, _name_len);
 }
 
 void challenge::init(scheme_parameters &scheme, unsigned int c, unsigned int chunk_count)
@@ -393,8 +366,11 @@ void response_proof::init(challenge &c, verification_metadata &vm, public_parame
 {
 	std::cout << "Initialiing response proof." << std::endl;
 	element_t r;
-	element_t chunk;
-	element_t mu_prime;
+	//element_t chunk;
+	mpz_t chunk;
+	element_t chunkmod;
+	//element_t mu_prime;
+	mpz_t mu_prime;
 	element_t gamma;
 	element_t t0;
 	mpz_t t1;
@@ -413,12 +389,17 @@ void response_proof::init(challenge &c, verification_metadata &vm, public_parame
 	// now R = e(u,v)^r, where r is random
 	element_pow_zn(_R,_R,r);
 	
-	element_init_Zr(chunk,scheme.get_pairing());
-	element_init_Zr(mu_prime,scheme.get_pairing());
+	//element_init_Zr(chunk,scheme.get_pairing());
+	mpz_init(chunk);
+	element_init_Zr(chunkmod,scheme.get_pairing());
+	//element_init_Zr(mu_prime,scheme.get_pairing());
+	mpz_init(mu_prime);
+	mpz_init(t1);
 	element_init_G1(_sigma,scheme.get_pairing());
 	element_init_G1(t0,scheme.get_pairing());
 	
-	element_set0(mu_prime);
+	//element_set0(mu_prime);
+	mpz_set_ui(mu_prime,0);
 	element_set1(_sigma);
 	
 	// calculate the linear combination of sampled blocks from the challenge
@@ -429,9 +410,16 @@ void response_proof::init(challenge &c, verification_metadata &vm, public_parame
 	{
 		challenge::pair pair = c.get_pair(i);
 		f.get_chunk(chunk,pair._s);
+		element_set_mpz(chunkmod,chunk);
+		element_to_mpz(chunk,chunkmod);
 		
-		element_mul(chunk,pair._v,chunk);
-		element_add(mu_prime,mu_prime,chunk);
+		element_to_mpz(t1,pair._v);
+		
+		//element_mul(chunkmod,pair._v,chunkmod);
+		mpz_mul(chunk,t1,chunk);
+		
+		//element_add(mu_prime,mu_prime,chunk);
+		mpz_add(mu_prime,mu_prime,chunk);
 		
 		element_pow_zn(t0,vm.get_authenticator(pair._s),pair._v);
 		element_mul(_sigma,_sigma,t0);
@@ -439,20 +427,29 @@ void response_proof::init(challenge &c, verification_metadata &vm, public_parame
 	
 	element_init_Zr(gamma,scheme.get_pairing());
 	
-	element_init_Zr(_mu,scheme.get_pairing());
+	//element_init_Zr(_mu,scheme.get_pairing());
+	mpz_init(_mu);
 	
 	hasher.hash_element_to_element(gamma,_R);
 	
 	// mu = r + gamma * mu'
-	element_mul(_mu,gamma,mu_prime);
+	//element_mul(_mu,gamma,mu_prime);
+	element_to_mpz(t1,gamma);
+	mpz_mul(_mu,t1,mu_prime);
 	
-	element_add(_mu,r,_mu);
+	//element_add(_mu,r,_mu);
+	element_to_mpz(t1,r);
+	mpz_add(_mu,t1,_mu);
 	
 	element_clear(gamma);
 	element_clear(t0);
-	element_clear(mu_prime);
-	element_clear(chunk);
+	//element_clear(mu_prime);
+	mpz_clear(mu_prime);
+	//element_clear(chunk);
+	mpz_clear(chunk);
+	element_clear(chunkmod);
 	element_clear(r);
+	mpz_clear(t1);
 	
 	_initialized = true;
 	std::cout << "Response proof initialized." << std::endl;
@@ -468,13 +465,14 @@ void response_proof::cleanup()
 	{
 		element_clear(_R);
 		element_clear(_sigma);
-		element_clear(_mu);
+		//element_clear(_mu);
+		mpz_clear(_mu);
 	}
 }
 
-void key_gen(scheme_parameters &scheme, secret_parameters &s, public_parameters &p)
+void key_gen(scheme_parameters &scheme, secret_parameters &s, public_parameters &p,char *params)
 {
-	scheme.init();
+	scheme.init(params);
 	s.init(scheme);
 	p.init(scheme,s);
 }
@@ -540,7 +538,8 @@ bool verify_proof(response_proof &r, challenge &c, verification_metadata &vm, pu
 	
 	element_pow_zn(t1,t1,gamma);
 	
-	element_pow_zn(t0,p.get_u(),r.get_mu());
+	//element_pow_zn(t0,p.get_u(),r.get_mu());
+	element_pow_mpz(t0,p.get_u(),r.get_mu());
 	
 	element_mul(t0,t1,t0);
 	

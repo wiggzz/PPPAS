@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <chrono>
 #include <ctime>
+#include <string>
 #include "core.h"
 
 using namespace pbpdp;
@@ -13,20 +14,40 @@ class random_file : public file
 public:
 	random_file(unsigned int size,pairing_t pairing)
 	{
+		init(size);
+		
+		_chunk_size = pairing_length_in_bytes_Zr(pairing);
+		
+		allocate_chunk_buf();
+	}
+	
+	random_file(unsigned int size,unsigned int chunk_size)
+	{
+		init(size);
+		
+		_chunk_size = chunk_size;
+		
+		allocate_chunk_buf();
+	}
+	
+	~random_file()
+	{
+		delete[] _buf;
+	}
+	
+	void init(unsigned int size)
+	{
 		_size = size;
 		_data = new unsigned char[_size];
 		
 		CryptoPP::AutoSeededRandomPool rng;
 		
 		rng.GenerateBlock(_data,_size);
-		
-		_chunk_size = pairing_length_in_bytes_Zr(pairing);
-		_buf = new unsigned char[_chunk_size];
 	}
 	
-	~random_file()
+	void allocate_chunk_buf()
 	{
-		delete[] _buf;
+		_buf = new unsigned char[_chunk_size];
 	}
 	
 	void get_chunk(mpz_t e,unsigned int i) // gets the next chunk into element e
@@ -80,22 +101,82 @@ private:
 	unsigned char *_buf;
 };
 
-int main()
+int main(int argc,char *argv[])
 {
 	// simple test program that should test the process.
 	try {
+	
+	// usage: [-ssize] [-bblock_size] [-pparam_file]
+	
+	unsigned int size = 10000;
+	unsigned int blk_size = 4000;
+	char *param_file_name = 0;
+	char *params = 0;
+	
+	for (int i=1;i<argc;i++)
+	{
+		if (argv[i][0] == '-')
+		{
+			switch (argv[i][1])
+			{
+			case 's':
+				size = atoi(&argv[i][2]);
+				std::cout << "Using file size of " << size << std::endl;
+				break;
+			case 'b':			
+				blk_size = atoi(&argv[i][2]);
+				std::cout << "Using block size of " << blk_size << std::endl;
+				break;
+			case 'p':
+				param_file_name = &argv[i][2];
+				std::cout << "Using parameter file " << param_file_name << std::endl;
+				
+				break;
+			}
+		}
+	}
+	
+	if (param_file_name)
+	{
+		std::cout << "Opening " << param_file_name << std::endl;
+		FILE * f = fopen(param_file_name,"rb");
+		if (f != NULL)
+		{
+			fseek(f,0,SEEK_END);
+			int sz = ftell(f);
+			rewind(f);
+		
+			params = new char[sz+1];
+			
+			int read = fread(params,1,sz,f);
+			
+			if (read != sz)
+			{
+				throw new std::runtime_error("Failed to read parameter file.");
+			}
+			fclose(f);
+			
+			params[sz] = 0;
+			
+			std::cout << "Using parameters: " << std::endl << params << std::endl;
+		}
+		else
+		{
+			throw new std::runtime_error("Unable to open parameter file.");
+		}
+	}
+	
 	scheme_parameters scheme;
 	public_parameters p;
 	secret_parameters s;
-	const unsigned int size = 64000;
 	
 	std::cout << "Generating key..." << std::endl;
 	
 	std::chrono::time_point<std::chrono::system_clock> start, end;
 	
-	key_gen(scheme,s,p);
+	key_gen(scheme,s,p,params);
 	
-	random_file f(size,scheme.get_pairing());
+	random_file f(size,blk_size);
 	
 	verification_metadata vmd;
 	

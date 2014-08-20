@@ -1,10 +1,13 @@
 #include <pbc/pbc.h>
 #include <vector>
 
+// this is an implementation of C. Wang, S. Chow, Q. Wang, K. Ren, W. Lou "Privacy-Preserving Public Auditing for Secure Cloud Storage"
+
 namespace pbpdp
 {	
 	class file
 	{
+	// file chunks should be smaller than N for the scheme to work.  otherwise the server can store m_i as m_i mod N.  
 	public:
 		virtual void get_chunk(element_t e,unsigned int i) = 0; // gets the next chunk into element e
 		virtual void get_chunk(mpz_t e,unsigned int i) = 0; // gets the next chunk into mpz integer e
@@ -24,8 +27,8 @@ namespace pbpdp
 	{
 	public:
 		scheme_parameters() : _initialized(false) {}
-		void init();
-		void init(unsigned char *data,unsigned int sz); // initializes from serialized form
+		void init(char *params = 0);
+		//void init(unsigned char *data,unsigned int sz); // initializes from serialized form
 		void cleanup();
 	
 		pairing_s* get_pairing() { return _pairing; }
@@ -130,7 +133,7 @@ namespace pbpdp
 		element_s* get_authenticator(unsigned int i) { return &_authenticators[i]; }
 		
 		unsigned int get_W_size() const;
-		void append_index_to_W(unsigned int i);
+		void append_index_to_W(unsigned int i) const;
 		void get_HWi(element_t e,unsigned int i) const;
 		void get_HWi(mpz_t e,unsigned int i) const;
 		void get_Hname(element_t e) const;  // returns the hash of the name (for signing)
@@ -148,7 +151,7 @@ namespace pbpdp
 		unsigned int		_name_len;
 		unsigned char *		_name_sig;
 		unsigned int		_name_sig_len;
-		unsigned char* 		_W_buffer;
+		mutable unsigned char* 		_W_buffer;
 		element_hash		_hasher;
 	};
 	
@@ -185,7 +188,8 @@ namespace pbpdp
 		void init(challenge &c, verification_metadata &vm, public_parameters &p, scheme_parameters &scheme, file &f);
 		void cleanup();
 		
-		element_s* get_mu() { return _mu; }
+		//element_s* get_mu() { return _mu; }
+		__mpz_struct* get_mu() { return _mu; }
 		element_s* get_sigma() { return _sigma; }
 		element_s* get_R() { return _R; }
 		
@@ -195,12 +199,13 @@ namespace pbpdp
 		
 	private:
 		bool				_initialized;
-		element_t			_mu;				// Zp
+		//element_t			_mu;				// Zp
+		mpz_t				_mu;
 		element_t			_sigma;				// G1
 		element_t			_R;					// GT
 	};
 	
-	void key_gen(scheme_parameters &scheme, secret_parameters &s, public_parameters &p);
+	void key_gen(scheme_parameters &scheme, secret_parameters &s, public_parameters &p,char *params = 0);
 	void sig_gen(verification_metadata &vmd, secret_parameters &s, public_parameters &p, scheme_parameters &scheme, file &f);
 	bool check_sig(verification_metadata &vmd, public_parameters &p, scheme_parameters &scheme);
 	void gen_challenge(challenge &chal, scheme_parameters &scheme, unsigned int c, unsigned int chunk_count);
