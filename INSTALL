@@ -1,6 +1,15 @@
-To install run:
+Dependencies:
 
+gmp
+cryptopp
+pbc
+
+To test run:
+
+aclocal
+autoconf
+automake --add-missing
 ./configure
-make
+make check
 
-not sure that install is supported at this point since there isn't really a library to install.
+There isn't really a library at this point as this is a proof of concept.
