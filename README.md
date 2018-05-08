@@ -20,11 +20,13 @@ brew install cryptopp pbc
 
 # Getting it running
 
+```
 aclocal
 autoconf
 automake --add-missing
 ./configure
 make check
+```
 
 That will run the one test case that I have written.
 
